@@ -92,5 +92,22 @@ class CartViewSet(viewsets.ModelViewSet):
             else:  # Иначе создаём объект по умолчанию (quantity по умолчанию = 1, так прописали в моделях)
                 cart_item = Cart(user=request.user, product=product)
         cart_item.save()  # Сохранили объект в БД
-        return response.Response({'message': 'Product added to cart'})  # Вернули ответ, что всё прошло успешно
+        return response.Response({'message': 'Product added to cart'}, status=201)
+        # Вернули ответ, что всё прошло успешно
 
+    def update(self, request, *args, **kwargs):
+        # Для удобства в kwargs передаётся id строки для изменения в БД, под параметром pk
+        cart_item = get_object_or_404(Cart, id=kwargs['pk'])
+        if request.data.get('quantity'):
+            cart_item.quantity = request.data['quantity']
+        if request.data.get('product'):
+            product = get_object_or_404(Product, id=request.data['product'])
+            cart_item.product = product
+        cart_item.save()
+        return response.Response({'message': 'Product change to cart'}, status=201)
+
+    def destroy(self, request, *args, **kwargs):
+        # В этот раз напишем примерно так как это делает фреймфорк самостоятельно
+        cart_item = self.get_queryset().get(id=kwargs['pk'])
+        cart_item.delete()
+        return response.Response({'message': 'Product delete from cart'}, status=201)
