@@ -20,7 +20,8 @@ class LoginView(View):
             if user is not None:
                 login(request, user)
                 return redirect('store:shop')
-        return redirect('login:login')
+        return render(request, "login/index.html",
+                      context={'errors': form.errors})
 
 
 class LogoutView(View):
